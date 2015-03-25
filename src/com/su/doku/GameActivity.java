@@ -43,7 +43,7 @@ public class GameActivity extends Activity
 	private int time = 0;
 	private int number = 1;
 	
-	private final int sudokuSize = 9;
+	private final int sudokuSize = 9;	
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -53,7 +53,7 @@ public class GameActivity extends Activity
 		
 		produce sudokuProduce = new produce();
 		answer = sudokuProduce.generatePuzzleMatrix();
-		givenNumber = sudokuProduce.generatePuzzleQuestion(2);
+		givenNumber = sudokuProduce.generatePuzzleQuestion(1);
 		
 		initializeViews();
 		receiveData();
@@ -75,7 +75,7 @@ public class GameActivity extends Activity
 		//�ΨӨ��o�ù��j�p
 		DisplayMetrics displayMetrics = new DisplayMetrics();
 		getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-		int preferSize = displayMetrics.widthPixels/10;
+		int preferSize = displayMetrics.widthPixels/sudokuSize;
 		
 		gridLayout = (GridLayout) findViewById(R.id.GridLayout1);
 		sudokuUnits = new SudokuUnit[sudokuSize][sudokuSize];
@@ -97,6 +97,8 @@ public class GameActivity extends Activity
 			}
 		}
 		imageView1 = (ImageView) findViewById(R.id.imageView1);
+		imageView1.getLayoutParams().height = preferSize;
+		imageView1.getLayoutParams().width = preferSize;
 		imageView1.setOnTouchListener(touchListener);
 		resetButton = (Button) findViewById(R.id.button_reset);
 		resetButton.setOnClickListener(resetButtonListener);

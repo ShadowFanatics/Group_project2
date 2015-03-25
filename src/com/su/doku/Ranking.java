@@ -225,7 +225,6 @@ public class Ranking extends Activity{
 		                Ranking.this.finish();
 					}
 				});*/
-	     
 	            return convertView;  
 			}
 			
