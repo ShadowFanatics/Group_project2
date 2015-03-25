@@ -40,11 +40,14 @@ public class GameActivity extends Activity
 	
 	private int answer[][] = new int[9][9];
 	private int givenNumber[][] = new int[9][9];
+	private int userMatrix[][] = new int[9][9];
 	private int time = 0;
 	private int number = 1;
 	
 	private final int sudokuSize = 9;	
-	
+	private SaveReadState saveObject = new SaveReadState();
+	private int level;
+	private int remainBlock;
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
@@ -53,7 +56,9 @@ public class GameActivity extends Activity
 		
 		produce sudokuProduce = new produce();
 		answer = sudokuProduce.generatePuzzleMatrix();
-		givenNumber = sudokuProduce.generatePuzzleQuestion(1);
+		level = 1;
+		remainBlock = level * 9;
+		givenNumber = sudokuProduce.generatePuzzleQuestion(level);
 		
 		initializeViews();
 		receiveData();
@@ -72,7 +77,7 @@ public class GameActivity extends Activity
 		timeTextView = (TextView) findViewById(R.id.textView_time);
 		timeTextView.setText(String.valueOf(time));
 		
-		//�ΨӨ��o�ù��j�p
+		//用來取得螢幕大小
 		DisplayMetrics displayMetrics = new DisplayMetrics();
 		getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
 		int preferSize = displayMetrics.widthPixels/sudokuSize;
@@ -85,9 +90,11 @@ public class GameActivity extends Activity
 			{
 				if ( givenNumber[i][j] == 1 ) {
 					sudokuUnits[i][j] = new SudokuUnit(GameActivity.this, i, j, answer[i][j]);
+					userMatrix[i][j] = answer[i][j];
 				}
 				else {
 					sudokuUnits[i][j] = new SudokuUnit(GameActivity.this, i, j, 0);
+					userMatrix[i][j] = 0;
 				}
 				sudokuUnits[i][j].setOnDragListener(dragListener);
 				gridLayout.addView(sudokuUnits[i][j], i*sudokuSize+j);
@@ -117,11 +124,16 @@ public class GameActivity extends Activity
 		Bundle bundle = getIntent().getExtras();
 		if(bundle.getBoolean("isStart"))
 		{
-			// TODO �ͦ��s�C��
+			// TODO 生成新遊戲
 		}
 		else
 		{
-			// TODO Ū���������C����T
+			// TODO 讀取未完成遊戲資訊
+			saveObject.ReadState();
+			answer = saveObject.getAnswer();
+			userMatrix = saveObject.getUserMatrix();
+			
+			
 		}
 	}
 	
@@ -130,9 +142,9 @@ public class GameActivity extends Activity
 		@Override
 		public boolean onTouch(View v, MotionEvent event)
 		{
-			//�e�̧ڶö�,�]�S�Ψ�; ��̬O���a�����
+			//前者我亂填的,也沒用到; 後者是夾帶的資料
 			ClipData clipData = ClipData.newPlainText("number", number+"");
-			//�Ф@�Ӹ�imageView1���o�@�˪�shadow
+			//創一個跟imageView1長得一樣的shadow
 			View.DragShadowBuilder shadowBuilder = new View.DragShadowBuilder(imageView1);
 			v.startDrag(clipData, shadowBuilder, null, 0);
 			return true;
@@ -154,13 +166,19 @@ public class GameActivity extends Activity
 				break;
 			case DragEvent.ACTION_DRAG_EXITED:
 				break;
-			case DragEvent.ACTION_DROP:	//��Q�즲�����󲾰ʨ즹view���d��é�U��
+			case DragEvent.ACTION_DROP:	//當被拖曳的物件移動到此view的範圍並放下時
 				SudokuUnit sudokuUnit = (SudokuUnit) v;
-				//���o���a���
+				//取得夾帶資料
 				int data = Integer.parseInt(event.getClipData().getItemAt(0).getText().toString());
 				if(data == answer[sudokuUnit.getIndexX()][sudokuUnit.getIndexY()])
 				{
 					sudokuUnit.setNumber(data);
+					userMatrix[sudokuUnit.getIndexX()][sudokuUnit.getIndexY()] = data;
+					remainBlock--;
+				}
+				//判斷結束沒
+				if (remainBlock == 0 ) {
+					
 				}
 				break;
 			case DragEvent.ACTION_DRAG_ENDED:
@@ -259,7 +277,7 @@ public class GameActivity extends Activity
 			@Override
 			public void onClick(DialogInterface dialog, int which)
 			{
-				// TODO ���m�C��
+				// TODO 重置遊戲
 			}
 		})
 		.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener()
@@ -283,13 +301,14 @@ public class GameActivity extends Activity
 			@Override
 			public void onClick(DialogInterface dialog, int which)
 			{
-				// TODO �^�ǹC�����
-				Bundle bundle = new Bundle();
+				// TODO 回傳遊戲資料
+				/*Bundle bundle = new Bundle();
 				
 				Intent intent = new Intent();
 				intent.putExtras(bundle);
-				setResult(RESULT_OK, intent);
-				
+				setResult(RESULT_OK, intent);*/
+				int queue[] = {1,2,3,4};
+				saveObject.SaveState(answer, userMatrix, queue);
 				//back to title
 				GameActivity.this.finish();
 			}

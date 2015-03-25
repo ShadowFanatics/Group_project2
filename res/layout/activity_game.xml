@@ -29,6 +29,14 @@
 
     </GridLayout>
 
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/GridLayout1"
+        android:layout_marginBottom="53dp"
+        android:layout_marginLeft="16dp"
+        android:layout_toRightOf="@+id/GridLayout1" >
+    </LinearLayout>
     <ImageView
         android:id="@+id/imageView1"
         android:layout_width="wrap_content"
@@ -60,5 +68,7 @@
         android:layout_below="@+id/imageView1"
         android:layout_toRightOf="@+id/button_back"
         android:text="完成" />
+
+    
 
 </RelativeLayout>
