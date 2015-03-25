@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Sudoku</string>
+    <string name="action_help">Help</string>
+    <string name="help_message">誰來想一下要寫啥</string>
+    
+    <string name="title">Sudoku 數獨</string>
+    <string name="choice_start">新遊戲</string>
+    <string name="choice_continue">繼續遊戲</string>
+    <string name="choice_rank">排行榜</string>
+    <string name="choice_exit">離開遊戲</string>
+    <string name="confirm_start">若有未完成遊戲將無法接續!\n是否開新遊戲?</string>
+    <string name="confirm_exit">是否離開遊戲?</string>
+    
+    <string name="time">遊戲時間:</string>
+    <string name="choice_reset">重置遊戲</string>
+    <string name="confirm_reset">是否重置遊戲?</string>
+    <string name="choice_back">回到標題</string>
+    <string name="confirm_back">是否回到標題?</string>
+    
+    
+    
+    <string name="ranking_back">BACK</string>
+    <string name="Ranking_record_string">紀錄：</string>
+
+
+</resources>
