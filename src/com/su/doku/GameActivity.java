@@ -1,5 +1,6 @@
 package com.su.doku;
 
+import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -17,9 +18,12 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnDragListener;
 import android.view.View.OnTouchListener;
+import android.view.animation.Animation;
+import android.view.animation.TranslateAnimation;
 import android.widget.Button;
 import android.widget.GridLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 public class GameActivity extends Activity
@@ -33,8 +37,9 @@ public class GameActivity extends Activity
 	private Button finishButton;
 	
 	private GridLayout gridLayout;
+	private LinearLayout linearLayout;
 	private SudokuUnit[][] sudokuUnits;
-	private ImageView imageView1;
+	private DragUnit dragUnits[];
 	private Button resetButton;
 	private Button backButton;
 	
@@ -42,12 +47,16 @@ public class GameActivity extends Activity
 	private int givenNumber[][] = new int[9][9];
 	private int userMatrix[][] = new int[9][9];
 	private int time = 0;
-	private int number = 1;
+	
 	
 	private final int sudokuSize = 9;	
 	private SaveReadState saveObject = new SaveReadState();
 	private int level;
+	private int totalBlock;
 	private int remainBlock;
+	private int preferSize;
+	private final int queueSize = 5;
+	private int queueNumber = 0;
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
@@ -57,7 +66,9 @@ public class GameActivity extends Activity
 		produce sudokuProduce = new produce();
 		answer = sudokuProduce.generatePuzzleMatrix();
 		level = 1;
-		remainBlock = level * 9;
+		totalBlock = (level+1) * 9;
+		remainBlock = totalBlock;
+		dragUnits = new DragUnit[totalBlock];
 		givenNumber = sudokuProduce.generatePuzzleQuestion(level);
 		
 		initializeViews();
@@ -80,10 +91,11 @@ public class GameActivity extends Activity
 		//用來取得螢幕大小
 		DisplayMetrics displayMetrics = new DisplayMetrics();
 		getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-		int preferSize = displayMetrics.widthPixels/sudokuSize;
+		preferSize = displayMetrics.widthPixels/sudokuSize;
 		
 		gridLayout = (GridLayout) findViewById(R.id.GridLayout1);
 		sudokuUnits = new SudokuUnit[sudokuSize][sudokuSize];
+		int dragUnitCount = 0;
 		for(int i = 0; i < sudokuSize; i++)
 		{
 			for(int j = 0; j < sudokuSize; j++)
@@ -95,6 +107,7 @@ public class GameActivity extends Activity
 				else {
 					sudokuUnits[i][j] = new SudokuUnit(GameActivity.this, i, j, 0);
 					userMatrix[i][j] = 0;
+					dragUnits[dragUnitCount++] = new DragUnit(GameActivity.this,answer[i][j]);
 				}
 				sudokuUnits[i][j].setOnDragListener(dragListener);
 				gridLayout.addView(sudokuUnits[i][j], i*sudokuSize+j);
@@ -103,10 +116,7 @@ public class GameActivity extends Activity
 				sudokuUnits[i][j].getLayoutParams().width = preferSize;
 			}
 		}
-		imageView1 = (ImageView) findViewById(R.id.imageView1);
-		imageView1.getLayoutParams().height = preferSize;
-		imageView1.getLayoutParams().width = preferSize;
-		imageView1.setOnTouchListener(touchListener);
+		
 		resetButton = (Button) findViewById(R.id.button_reset);
 		resetButton.setOnClickListener(resetButtonListener);
 		backButton = (Button) findViewById(R.id.button_back);
@@ -117,6 +127,8 @@ public class GameActivity extends Activity
 		
 		gameTimer = new Timer();
 		gameTimer.schedule(timer_task, 0, 1000);
+		
+		linearLayout = (LinearLayout) findViewById(R.id.LinearLayout1);
 	}
 	
 	private void receiveData()
@@ -143,10 +155,14 @@ public class GameActivity extends Activity
 		public boolean onTouch(View v, MotionEvent event)
 		{
 			//前者我亂填的,也沒用到; 後者是夾帶的資料
-			ClipData clipData = ClipData.newPlainText("number", number+"");
+			DragUnit temp = (DragUnit)v;
+			ClipData clipData = ClipData.newPlainText("number", temp.getNumber()+"");
 			//創一個跟imageView1長得一樣的shadow
-			View.DragShadowBuilder shadowBuilder = new View.DragShadowBuilder(imageView1);
+			View.DragShadowBuilder shadowBuilder = new View.DragShadowBuilder(v);
 			v.startDrag(clipData, shadowBuilder, null, 0);
+			linearLayout.removeView(v);
+			temp.removeFromQueue();
+			queueNumber--;
 			return true;
 		}
 	};
@@ -239,6 +255,7 @@ public class GameActivity extends Activity
 			super.handleMessage(msg);
 			switch (msg.what) {
 			case 1:
+				time++;
 				csec = tsec % 60;
 				cmin = tsec / 60;
 				String s = "";
@@ -257,8 +274,11 @@ public class GameActivity extends Activity
 				//if(startFlag = false){
 				//	gameTimer.cancel();
 				//}
+				if ( time % 5 == 0 && queueNumber < queueSize) {
+					generateDargUnit();
+				}
+				
 				break;
-
 			default:
 				break;
 			}
@@ -322,5 +342,33 @@ public class GameActivity extends Activity
 			}
 		})
 		.show();
+	}
+	
+	private void generateDargUnit() {
+		queueNumber++;
+		int index = getRandomInt(0,totalBlock-1);
+		while(dragUnits[index].isCorrect() && !dragUnits[index].isInQueue()) {
+			index = getRandomInt(1,totalBlock);
+		}
+		dragUnits[index].showInQueue();
+		linearLayout.addView(dragUnits[index]);
+		dragUnits[index].getLayoutParams().height = preferSize;
+		dragUnits[index].getLayoutParams().width = preferSize;
+		dragUnits[index].setOnTouchListener(touchListener);
+		
+		Animation am = new TranslateAnimation( (6-queueNumber)*preferSize, 0, 0, 0 );
+	    
+	    // 動畫開始到結束的執行時間 (1000 = 1 秒)
+	    am.setDuration( 1000 );
+	    
+	    // 動畫重複次數 (-1 表示一直重複)
+	    am.setRepeatCount(0);
+	    dragUnits[index].setAnimation(am);
+	    am.startNow();
+	}
+	
+	private int getRandomInt(int min, int max) {
+		Random r = new Random();
+		return r.nextInt(max - min + 1) + min;
 	}
 }
