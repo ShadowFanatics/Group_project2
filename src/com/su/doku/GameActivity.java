@@ -107,6 +107,7 @@ public class GameActivity extends Activity
 				else {
 					sudokuUnits[i][j] = new SudokuUnit(GameActivity.this, i, j, 0);
 					userMatrix[i][j] = 0;
+					sudokuUnits[i][j].setDragUnitIndex(dragUnitCount);
 					dragUnits[dragUnitCount++] = new DragUnit(GameActivity.this,answer[i][j]);
 				}
 				sudokuUnits[i][j].setOnDragListener(dragListener);
@@ -191,6 +192,7 @@ public class GameActivity extends Activity
 					sudokuUnit.setNumber(data);
 					userMatrix[sudokuUnit.getIndexX()][sudokuUnit.getIndexY()] = data;
 					remainBlock--;
+					dragUnits[sudokuUnit.getIndexAtDargUnit()].correct();
 				}
 				//判斷結束沒
 				if (remainBlock == 0 ) {
@@ -348,7 +350,7 @@ public class GameActivity extends Activity
 		queueNumber++;
 		int index = getRandomInt(0,totalBlock-1);
 		while(dragUnits[index].isCorrect() && !dragUnits[index].isInQueue()) {
-			index = getRandomInt(1,totalBlock);
+			index = getRandomInt(0,totalBlock-1);
 		}
 		dragUnits[index].showInQueue();
 		linearLayout.addView(dragUnits[index]);
