@@ -1,5 +1,12 @@
 package com.su.doku;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -7,20 +14,27 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ClipData;
 import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
+import android.graphics.Paint;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.util.DisplayMetrics;
 import android.view.DragEvent;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnDragListener;
 import android.view.View.OnTouchListener;
+import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class GameActivity extends Activity
 {
@@ -29,6 +43,10 @@ public class GameActivity extends Activity
 	private TextView timeTextView;
 	private int tsec=0,csec=0,cmin=0;
 	//private boolean startFlag = true;
+	private static final String FileName = "record.txt";
+	private String player_name = "";
+	private EditText finish_text;
+	private File fileDir;
 	
 	private Button finishButton;
 	
@@ -102,6 +120,8 @@ public class GameActivity extends Activity
 		resetButton.setOnClickListener(resetButtonListener);
 		backButton = (Button) findViewById(R.id.button_back);
 		backButton.setOnClickListener(backButtonListener);
+		
+		finish_text = (EditText)findViewById(R.id.etname);
 		
 		finishButton = (Button) findViewById(R.id.button_finish);
 		finishButton.setOnClickListener(finishButtonListener);
@@ -192,7 +212,9 @@ public class GameActivity extends Activity
 		@Override
 		public void onClick(View v)
 		{
-			showBackDialog();
+			showfinishDialog();
+			//writeRecord(FileName);
+			//showBackDialog();
 			//restart
 			//tsec = 0;
 			//timeTextView.setTag("00:00");
@@ -245,7 +267,61 @@ public class GameActivity extends Activity
 		}
 	};
 	
-	
+	//結束存紀錄
+	private boolean FindDirectoryPath() {
+		if (Environment.getExternalStorageState().equals(
+				Environment.MEDIA_REMOVED)) {
+			Toast.makeText(GameActivity.this, "沒有SDDDD", Toast.LENGTH_SHORT)
+					.show();
+			return false;
+		}
+		else{
+			fileDir = new File(Environment.getExternalStorageDirectory().getPath() + "/SuDoKu");
+			if (!fileDir.exists())
+				fileDir.mkdirs();
+			return true;
+		}
+	}
+    
+    private void writeRecord(String filename){
+    	if(FindDirectoryPath()){
+    		BufferedWriter writer = null;
+			File file = null;
+			
+			//抓時間日期
+			SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+			Date curDate = new Date(System.currentTimeMillis());
+			String str = formatter.format(curDate);
+    		try {
+    			file = new File(fileDir.getAbsolutePath() + "/" + filename);
+				writer = new BufferedWriter(new OutputStreamWriter(
+						new FileOutputStream(file, false), "UTF-8"));
+				
+				writer.append(String.valueOf(tsec) + ",");
+				writer.append(str + ",");
+				writer.append(player_name);
+				writer.newLine();
+				writer.flush();
+				Toast.makeText(GameActivity.this, "Saved", Toast.LENGTH_SHORT)
+				.show();
+				
+			} catch (Exception e) {
+				// TODO: handle exception
+				Toast.makeText(GameActivity.this, "Saving Failed",
+						Toast.LENGTH_SHORT).show();
+			}
+    		finally{
+				if (writer != null) {
+					try {
+						writer.close();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+    		}
+    	}
+    }
+	//end
 	
 	private void showResetDialog()
 	{
@@ -301,5 +377,27 @@ public class GameActivity extends Activity
 			}
 		})
 		.show();
+	}
+	
+	private void showfinishDialog(){
+		LayoutInflater inflater = getLayoutInflater();
+		View layout = inflater.inflate(R.layout.dialog, (ViewGroup)findViewById(R.id.dialog));
+			
+		new AlertDialog.Builder(GameActivity.this)
+		.setTitle(R.string.finish_dialoag_title)
+		.setIcon(android.R.drawable.ic_dialog_info)
+		.setView(layout)
+		.setNegativeButton("確定", new DialogInterface.OnClickListener() {
+			
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				// TODO Auto-generated method stub
+				
+				player_name = finish_text.getText().toString();//這行狂當 我不知為什麼ＱＱ
+				//要存檔 call writeRecord(FileName)
+			}
+		})
+		.setPositiveButton("重新一局", null).show();
+		
 	}
 }

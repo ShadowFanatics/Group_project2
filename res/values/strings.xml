@@ -23,6 +23,8 @@
     
     <string name="ranking_back">BACK</string>
     <string name="Ranking_record_string">紀錄：</string>
+    <string name="finish_dialoag_title">輸入姓名以保留成績</string>
+    <string name="finish_dialoag_message">需要儲存成績嗎？</string>
 
 
 </resources>
