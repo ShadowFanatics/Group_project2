@@ -10,19 +10,23 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 public class DragUnit extends RelativeLayout {
-	private static int images[] = { R.drawable.unit_back, R.drawable.unit1,
-			R.drawable.unit2, R.drawable.unit3, R.drawable.unit4,
-			R.drawable.unit5, R.drawable.unit6, R.drawable.unit7,
-			R.drawable.unit8, R.drawable.unit9 };
+	private static int images[] = { R.drawable.unit_back, R.drawable.unit01,
+			R.drawable.unit02, R.drawable.unit03, R.drawable.unit04,
+			R.drawable.unit05, R.drawable.unit06, R.drawable.unit07,
+			R.drawable.unit08, R.drawable.unit09 };
 	private static int backs[] = { R.drawable.light1, R.drawable.light2,
 			R.drawable.light3, R.drawable.light4, R.drawable.light5 };
+	private static int breaks[] = { R.drawable.slit1, R.drawable.slit2,
+		R.drawable.slit3, R.drawable.slit4 };
 	private int number;
 	private int queueIndex;
 	private boolean isCorrect = false;
 	private boolean isInQueue = false;
 	private Timer timer;
 	private int scoreLevel = 0;
+	private int breakLevel = 0;
 	private ImageView back;
+	private ImageView slit;
 	public DragUnit(Context context, int number, int index) {
 		super(context);
 
@@ -36,6 +40,12 @@ public class DragUnit extends RelativeLayout {
 		num.setPadding(0, 0, 0, 0);
 		num.setBackgroundColor(0);
 		this.addView(num);
+		
+		slit = new ImageView(context);
+		slit.setImageDrawable(getResources().getDrawable(breaks[breakLevel]));
+		slit.setPadding(0, 0, 0, 0);
+		slit.setBackgroundColor(0);
+		this.addView(slit);
 
 		this.number = number;
 		this.queueIndex = index;
@@ -60,14 +70,21 @@ public class DragUnit extends RelativeLayout {
 			super.handleMessage(msg);
 			switch (msg.what) {
 			case 1:
-				if ( scoreLevel < 4 ) {
-					scoreLevel++;
-					back.setImageDrawable(getResources().getDrawable(backs[scoreLevel]));
+				if ( breakLevel < 3 ) {
+					breakLevel++;
+					slit.setImageDrawable(getResources().getDrawable(breaks[breakLevel]));
 				}
 				else {
-					timer.cancel();
+					if ( scoreLevel < 4 ) {
+						breakLevel = 0;
+						slit.setImageDrawable(getResources().getDrawable(breaks[breakLevel]));
+						scoreLevel++;
+						back.setImageDrawable(getResources().getDrawable(backs[scoreLevel]));
+					}
+					else {
+						timer.cancel();
+					}
 				}
-				
 				break;
 			default:
 				break;

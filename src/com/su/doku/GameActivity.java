@@ -250,6 +250,7 @@ public class GameActivity extends Activity {
 					sudokuUnit.setNumber(data);
 					remainBlock--;
 					isDraging.correct();
+					score += isDraging.getScoreLevel()*level*10;
 				}
 				isDraging = null;
 				// 判斷結束沒
@@ -505,11 +506,11 @@ public class GameActivity extends Activity {
 		return r.nextInt(max - min + 1) + min;
 	}
 
-	protected void showNotification(double BMI) {
+	protected void showNotification(String msg) {
 		NotificationManager barManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
 		Notification barMsg = new Notification(R.drawable.ic_launcher,
-				String.valueOf(BMI), System.currentTimeMillis());
+				msg, System.currentTimeMillis());
 		PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
 				new Intent(this, GameActivity.class),
 				PendingIntent.FLAG_UPDATE_CURRENT);
@@ -536,10 +537,11 @@ public class GameActivity extends Activity {
 			public void onClick(DialogInterface dialog, int which) {
 				// TODO Auto-generated method stub
 				
-				finish_text = (EditText)findViewById(R.id.etname);
-				finish_name_text = (TextView)findViewById(R.id.tvname);
+				finish_text = (EditText)((AlertDialog)dialog).findViewById(R.id.etname);
+				finish_name_text = (TextView)((AlertDialog)dialog).findViewById(R.id.tvname);
 				player_name = finish_text.getText().toString();//這句必當
-				Toast.makeText(GameActivity.this, "你选择的id为" + which, Toast.LENGTH_SHORT).show();
+				showNotification(player_name);
+				//Toast.makeText(GameActivity.this, "你选择的id为" + which, Toast.LENGTH_SHORT).show();
 				writeRecord(FileName);
 				
 			}
