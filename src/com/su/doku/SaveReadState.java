@@ -113,11 +113,14 @@ public class SaveReadState {
 		}
 	}
 
-	public void ReadState() {
+	public boolean ReadState() {
 		File file = null;
 		Scanner reader = null;
 		try {
 			file = new File(fileDir.getAbsolutePath() + "/" + filename);
+			if ( !file.exists() ) {
+				return false;
+			}
 			reader = new Scanner(file);
 			
 			//level
@@ -155,6 +158,7 @@ public class SaveReadState {
 		} finally {
 			reader.close();
 		}
+		return true;
 	}
 
 	private boolean FindDirectoryPath() {

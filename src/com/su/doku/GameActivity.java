@@ -99,11 +99,15 @@ public class GameActivity extends Activity {
 
 	}
 
-	/*
-	 * @Override protected void onPause() { super.onPause();
-	 * 
-	 * }
-	 */
+	
+	protected void onPause() {
+		super.onPause();
+		saveData();
+	}
+	protected void onStop() {
+		super.onStop();
+		saveData();
+	}
 
 	private void initializeViews() {
 		timeTextView = (TextView) findViewById(R.id.textView_time);
@@ -140,7 +144,8 @@ public class GameActivity extends Activity {
 		Bundle bundle = getIntent().getExtras();
 		sudokuUnits = new SudokuUnit[sudokuSize][sudokuSize];
 		linearLayout = (LinearLayout) findViewById(R.id.LinearLayout1);
-		if (bundle.getBoolean("isStart")) {
+		Boolean fileExist = saveObject.ReadState();
+		if ( bundle.getBoolean("isStart") || !fileExist) {
 			produce sudokuProduce = new produce();
 			answer = sudokuProduce.generatePuzzleMatrix();
 			level = 1;
@@ -166,7 +171,7 @@ public class GameActivity extends Activity {
 
 		} else {
 			// TODO 讀取未完成遊戲資訊
-			saveObject.ReadState();
+			
 			answer = saveObject.getAnswer();
 			givenNumber = saveObject.getShowMatrix();
 			tsec = saveObject.getTime();
@@ -413,8 +418,38 @@ public class GameActivity extends Activity {
 			public void onClick(DialogInterface dialog, int which)
 			{
 				// TODO 重置遊戲
+				tsec = 0;
+				score = 0;
+				/*produce sudokuProduce = new produce();
+				answer = sudokuProduce.generatePuzzleMatrix();
+				level = 1;
+				totalBlock = (level + 1) * 9;
+				remainBlock = totalBlock;
+				dragUnits = new DragUnit[totalBlock];
+				givenNumber = sudokuProduce.generatePuzzleQuestion(level);*/
+				gridLayout.removeAllViews();
+				linearLayout.removeAllViews();
+				int dragUnitCount = 0;
+				for (int i = 0; i < sudokuSize; i++) {
+					for (int j = 0; j < sudokuSize; j++) {
+						if (givenNumber[i][j] == 1) {
+							sudokuUnits[i][j] = new SudokuUnit(GameActivity.this, i, j, answer[i][j]);
+						} else {
+							sudokuUnits[i][j] = new SudokuUnit(GameActivity.this, i, j, 0);
+							dragUnits[dragUnitCount] = new DragUnit(
+									GameActivity.this, answer[i][j], dragUnitCount);
+							dragUnitCount++;
+						}
+						sudokuUnits[i][j].setOnDragListener(dragListener);
+						gridLayout.addView(sudokuUnits[i][j], i * sudokuSize + j);
+						// ����e
+						sudokuUnits[i][j].getLayoutParams().height = preferSize;
+						sudokuUnits[i][j].getLayoutParams().width = preferSize;
+					}
+				}
+				tsec = 0;
 			}
-		});
+		}).show();
 	}
 
 	// end
@@ -544,7 +579,6 @@ public class GameActivity extends Activity {
 				finish_name_text = (TextView)((AlertDialog)dialog).findViewById(R.id.tvname);
 
 				player_name = finish_text.getText().toString();//這句必當
-				showNotification(player_name);
 				//Toast.makeText(GameActivity.this, "你选择的id为" + which, Toast.LENGTH_SHORT).show();
 				writeRecord(FileName);
 				
