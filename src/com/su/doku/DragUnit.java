@@ -1,4 +1,4 @@
-package com.su.doku;
+﻿package com.su.doku;
 
 import java.util.Timer;
 import java.util.TimerTask;

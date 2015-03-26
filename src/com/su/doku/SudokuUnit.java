@@ -16,6 +16,7 @@ public class SudokuUnit extends RelativeLayout {
 		super(context);
 		this.indexX = indexX;
 		this.indexY = indexY;
+<<<<<<< HEAD
 
 		ImageView back = new ImageView(context);
 		back.setImageDrawable(getResources().getDrawable(images[0]));
@@ -27,6 +28,11 @@ public class SudokuUnit extends RelativeLayout {
 		num.setPadding(0, 0, 0, 0);
 		num.setBackgroundColor(0);
 		this.addView(num);
+=======
+		setBackground(getResources().getDrawable(images[0]));
+		setImageDrawable(getResources().getDrawable(images[number]));
+		setPadding(0, 0, 0, 0);
+>>>>>>> origin/硬硬
 	}
 
 	public void setNumber(int number) {

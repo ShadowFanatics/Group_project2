@@ -370,7 +370,7 @@ public class GameActivity extends Activity {
 			try {
 				file = new File(fileDir.getAbsolutePath() + "/" + filename);
 				writer = new BufferedWriter(new OutputStreamWriter(
-						new FileOutputStream(file, false), "UTF-8"));
+						new FileOutputStream(file, true), "UTF-8"));
 
 				writer.append(String.valueOf(tsec) + ",");
 				writer.append(str + ",");
@@ -538,7 +538,7 @@ public class GameActivity extends Activity {
 				
 				finish_text = (EditText)findViewById(R.id.etname);
 				finish_name_text = (TextView)findViewById(R.id.tvname);
-				//player_name = finish_text.getText().toString();//這句必當
+				player_name = finish_text.getText().toString();//這句必當
 				Toast.makeText(GameActivity.this, "你选择的id为" + which, Toast.LENGTH_SHORT).show();
 				writeRecord(FileName);
 				
