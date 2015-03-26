@@ -6,6 +6,9 @@ import java.util.TimerTask;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.ClipData;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -46,8 +49,9 @@ public class GameActivity extends Activity
 	private int answer[][] = new int[9][9];
 	private int givenNumber[][] = new int[9][9];
 	private int userMatrix[][] = new int[9][9];
+	private int saveQueue[] = new int[5];
 	private int time = 0;
-	
+	private DragUnit isDraging;
 	
 	private final int sudokuSize = 9;	
 	private SaveReadState saveObject = new SaveReadState();
@@ -56,7 +60,6 @@ public class GameActivity extends Activity
 	private int remainBlock;
 	private int preferSize;
 	private final int queueSize = 5;
-	private int queueNumber = 0;
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
@@ -71,8 +74,9 @@ public class GameActivity extends Activity
 		dragUnits = new DragUnit[totalBlock];
 		givenNumber = sudokuProduce.generatePuzzleQuestion(level);
 		
-		initializeViews();
 		receiveData();
+		initializeViews();
+		
 	}
 	
 	/*
@@ -107,8 +111,8 @@ public class GameActivity extends Activity
 				else {
 					sudokuUnits[i][j] = new SudokuUnit(GameActivity.this, i, j, 0);
 					userMatrix[i][j] = 0;
-					sudokuUnits[i][j].setDragUnitIndex(dragUnitCount);
-					dragUnits[dragUnitCount++] = new DragUnit(GameActivity.this,answer[i][j]);
+					dragUnits[dragUnitCount] = new DragUnit(GameActivity.this,answer[i][j],dragUnitCount);
+					dragUnitCount++;
 				}
 				sudokuUnits[i][j].setOnDragListener(dragListener);
 				gridLayout.addView(sudokuUnits[i][j], i*sudokuSize+j);
@@ -145,8 +149,28 @@ public class GameActivity extends Activity
 			saveObject.ReadState();
 			answer = saveObject.getAnswer();
 			userMatrix = saveObject.getUserMatrix();
+			for ( int i = 0; i < 9; i++ ) {
+				for ( int j = 0; j < 9; j++ ) {
+					if ( userMatrix[i][j] == 0 ) {
+						givenNumber[i][j] = 0;
+					}
+					else {
+						givenNumber[i][j] = 1;
+					}
+					
+				}
+			}
 			
 			
+			/*int readQueue[] = saveObject.getQueue();
+			for ( int i = 0; i < readQueue.length; i++ ) {
+				int index = readQueue[i];
+				dragUnits[index].showInQueue();
+				linearLayout.addView(dragUnits[index]);
+				dragUnits[index].getLayoutParams().height = preferSize;
+				dragUnits[index].getLayoutParams().width = preferSize;
+				dragUnits[index].setOnTouchListener(touchListener);
+			}*/
 		}
 	}
 	
@@ -161,9 +185,9 @@ public class GameActivity extends Activity
 			//創一個跟imageView1長得一樣的shadow
 			View.DragShadowBuilder shadowBuilder = new View.DragShadowBuilder(v);
 			v.startDrag(clipData, shadowBuilder, null, 0);
+			isDraging = temp;
 			linearLayout.removeView(v);
 			temp.removeFromQueue();
-			queueNumber--;
 			return true;
 		}
 	};
@@ -192,8 +216,9 @@ public class GameActivity extends Activity
 					sudokuUnit.setNumber(data);
 					userMatrix[sudokuUnit.getIndexX()][sudokuUnit.getIndexY()] = data;
 					remainBlock--;
-					dragUnits[sudokuUnit.getIndexAtDargUnit()].correct();
+					isDraging.correct();
 				}
+				isDraging = null;
 				//判斷結束沒
 				if (remainBlock == 0 ) {
 					
@@ -276,7 +301,7 @@ public class GameActivity extends Activity
 				//if(startFlag = false){
 				//	gameTimer.cancel();
 				//}
-				if ( time % 5 == 0 && queueNumber < queueSize) {
+				if ( time % 5 == 0 ) {
 					generateDargUnit();
 				}
 				
@@ -329,8 +354,12 @@ public class GameActivity extends Activity
 				Intent intent = new Intent();
 				intent.putExtras(bundle);
 				setResult(RESULT_OK, intent);*/
-				int queue[] = {1,2,3,4};
-				saveObject.SaveState(answer, userMatrix, queue);
+				showNotification(linearLayout.getChildCount());
+				for ( int i = 0; i < linearLayout.getChildCount(); i++ ) {
+					DragUnit temp = (DragUnit)linearLayout.getChildAt(i);
+					saveQueue[i] = temp.getIndex();
+				}
+				saveObject.SaveState(answer, userMatrix, saveQueue);
 				//back to title
 				GameActivity.this.finish();
 			}
@@ -347,9 +376,12 @@ public class GameActivity extends Activity
 	}
 	
 	private void generateDargUnit() {
-		queueNumber++;
+		int queueNumber = linearLayout.getChildCount();
+		if (remainBlock == 0 || queueNumber >= queueSize) {
+			return;
+		}
 		int index = getRandomInt(0,totalBlock-1);
-		while(dragUnits[index].isCorrect() && !dragUnits[index].isInQueue()) {
+		while(dragUnits[index].isCorrect() || dragUnits[index].isInQueue() || dragUnits[index] == isDraging) {
 			index = getRandomInt(0,totalBlock-1);
 		}
 		dragUnits[index].showInQueue();
@@ -373,4 +405,28 @@ public class GameActivity extends Activity
 		Random r = new Random();
 		return r.nextInt(max - min + 1) + min;
 	}
+	
+	protected void showNotification(double BMI)
+    {
+    	NotificationManager barManager = 
+    	(NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+    
+   	 Notification barMsg = new Notification(
+   	 R.drawable.ic_launcher,
+    	String.valueOf(BMI),
+    	System.currentTimeMillis()
+   	 );
+ 	PendingIntent contentIntent = PendingIntent.getActivity(   this,   0,  
+                        new  Intent(this,GameActivity.class),
+  	PendingIntent.FLAG_UPDATE_CURRENT);
+    
+   	barMsg.setLatestEventInfo(
+    	GameActivity.this, 
+   	 "您的BMI值過高", 
+   	 "你該節食了",
+    	contentIntent
+   	 );
+  	  barManager.notify(0,barMsg);    
+    }
+
 }

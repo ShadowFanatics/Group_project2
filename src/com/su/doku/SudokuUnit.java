@@ -10,7 +10,6 @@ public class SudokuUnit extends ImageView {
 			R.drawable.unit8, R.drawable.unit9 };
 	private int indexX;
 	private int indexY;
-	private int indexAtDargUnit;
 	public SudokuUnit(Context context, int indexX, int indexY, int number) {
 		super(context);
 		this.indexX = indexX;
@@ -29,13 +28,5 @@ public class SudokuUnit extends ImageView {
 
 	public int getIndexY() {
 		return indexY;
-	}
-	
-	public void setDragUnitIndex(int input) {
-		indexAtDargUnit = input;
-	}
-	
-	public int getIndexAtDargUnit() {
-		return indexAtDargUnit;
 	}
 }

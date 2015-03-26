@@ -9,13 +9,15 @@ public class DragUnit extends ImageView {
 			R.drawable.unit5, R.drawable.unit6, R.drawable.unit7,
 			R.drawable.unit8, R.drawable.unit9 };
 	private int number;
+	private int queueIndex;
 	private boolean isCorrect = false;
 	private boolean isInQueue = false;
-	public DragUnit(Context context, int number) {
+	public DragUnit(Context context, int number, int index) {
 		super(context);
 		setImageDrawable(getResources().getDrawable(images[number]));
 		setPadding(0, 0, 0, 0);
 		this.number = number;
+		this.queueIndex = index;
 	}
 	
 	public int getNumber() {
@@ -40,5 +42,9 @@ public class DragUnit extends ImageView {
 	
 	public boolean isInQueue() {
 		return isInQueue;
+	}
+	
+	public int getIndex() {
+		return queueIndex;
 	}
 }
