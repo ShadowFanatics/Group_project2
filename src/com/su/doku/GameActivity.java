@@ -147,7 +147,7 @@ public class GameActivity extends Activity
 		{
 			// TODO 讀取未完成遊戲資訊
 			saveObject.ReadState();
-			answer = saveObject.getAnswer();
+			/*answer = saveObject.getAnswer();
 			userMatrix = saveObject.getUserMatrix();
 			for ( int i = 0; i < 9; i++ ) {
 				for ( int j = 0; j < 9; j++ ) {
@@ -159,7 +159,7 @@ public class GameActivity extends Activity
 					}
 					
 				}
-			}
+			}*/
 			
 			
 			/*int readQueue[] = saveObject.getQueue();

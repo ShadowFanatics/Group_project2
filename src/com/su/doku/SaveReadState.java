@@ -17,7 +17,7 @@ public class SaveReadState {
 	int[][] puzzle = new int[puzzleScale][puzzleScale];
 	int[][] currentMatrix = new int[puzzleScale][puzzleScale];
 	int[] queue = new int[queueSize];
-	double time;
+	double time = 0;
 	String filePath = "/SuDoKu/CurrentState.txt";
 
 	public void SaveState(int[][] puzzle, int[][] currentMatrix, int[] queue) {
@@ -33,6 +33,7 @@ public class SaveReadState {
 
 		try {
 			file = new File(filePath);
+			file.createNewFile();
 			// ���I�s�X�榡�A�H�KŪ���ɤ���r�Ų��`
 			writer = new BufferedWriter(new OutputStreamWriter(
 					new FileOutputStream(file, true), "UTF-8"));
