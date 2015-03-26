@@ -6,12 +6,18 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.provider.ContactsContract.RawContacts.DisplayPhoto;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
+import android.widget.Toast;
 
 public class TitleActivity extends Activity
 {
@@ -22,6 +28,7 @@ public class TitleActivity extends Activity
 	private Button rankButton;
 	private Button exitButton;
 	private static int drawble_title = R.drawable.title;
+	private int difficulty;//難度數字 困難2,普通1,簡單0
 	private LinearLayout layout;
 	
 	@Override
@@ -94,6 +101,8 @@ public class TitleActivity extends Activity
 		public void onClick(View v)
 		{
 			showStartDialog();
+			//選難度的Dialog 傳遞參數為difficulty這數字
+			//showDifficultyDialog();
 		}
 	};
 	
@@ -216,5 +225,47 @@ public class TitleActivity extends Activity
 			}
 		})
 		.show();
+	}
+	
+	private void showDifficultyDialog() {
+		
+		final String[] arrayDifficulty = new String[]{"簡單", "普通", "困難"};
+		
+		new AlertDialog.Builder(TitleActivity.this)
+		.setTitle(R.string.confirm_start)
+		.setIcon(R.drawable.crown)
+		.setSingleChoiceItems(arrayDifficulty, 0, new DialogInterface.OnClickListener() {
+			
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				// TODO Auto-generated method stub
+				//Toast.makeText(TitleActivity.this, "你选择的id为" + which, Toast.LENGTH_SHORT).show();
+				difficulty = which;
+			}
+		})
+		.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener()
+		{
+			@Override
+			public void onClick(DialogInterface dialog, int which)
+			{
+				Bundle bundle = new Bundle();
+				bundle.putInt("isStart", difficulty);	//要取difficulty的話
+				
+				Intent intent = new Intent();
+				intent.putExtras(bundle);
+				intent.setClass(TitleActivity.this, GameActivity.class);
+	
+				startActivityForResult(intent, GAME_REQUEST);
+			}
+		})
+		.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener()
+		{
+			@Override
+			public void onClick(DialogInterface dialog, int which)
+			{
+				//nothing
+			}
+		})
+		.show();			
 	}
 }

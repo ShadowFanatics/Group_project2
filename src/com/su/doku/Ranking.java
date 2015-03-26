@@ -22,6 +22,7 @@ import java.util.Scanner;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -50,6 +51,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class Ranking extends Activity{
+		private static final int GAME_REQUEST = 0;	//need >= 0
+		private static final int RANK_REQUEST = 1;
+		private static final int TITLE_REQUEST = 2;
 	 	private ListView lv;  
 	    private List<RankData> mListlist;
 		private static int images[] = {R.drawable.record_number_0,
@@ -118,7 +122,11 @@ public class Ranking extends Activity{
 						int position, long id) {
 					// TODO Auto-generated method stub
 					Toast.makeText(Ranking.this, "輕觸一下表單 回到主畫面", Toast.LENGTH_SHORT).show();
-					Ranking.this.finish();				
+					
+					Intent intent = new Intent();
+					intent.setClass(Ranking.this, TitleActivity.class);
+					startActivityForResult(intent, TITLE_REQUEST);
+									
 				}
 	        	
 	        });

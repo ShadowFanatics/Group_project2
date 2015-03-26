@@ -46,6 +46,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class GameActivity extends Activity {
+	
+	private static final int GAME_REQUEST = 0;	//need >= 0
+	private static final int RANK_REQUEST = 1;
 	// timer variables
 	private Timer gameTimer;
 	private TextView timeTextView;
@@ -250,6 +253,7 @@ public class GameActivity extends Activity {
 					sudokuUnit.setNumber(data);
 					remainBlock--;
 					isDraging.correct();
+					score += isDraging.getScoreLevel()*level*10;
 				}
 				isDraging = null;
 				// 判斷結束沒
@@ -356,7 +360,7 @@ public class GameActivity extends Activity {
 		}
 	}
     
-    private void writeRecord(String filename){//這write會蓋掉每次的資料 write之前要先read也許
+    private void writeRecord(String filename){
     	if(FindDirectoryPath()){
     		BufferedWriter writer = null;
 			File file = null;
@@ -374,7 +378,7 @@ public class GameActivity extends Activity {
 
 				writer.append(String.valueOf(tsec) + ",");
 				writer.append(str + ",");
-				writer.append("肉餅臉");
+				writer.append(player_name);
 				writer.newLine();
 				writer.flush();
 				Toast.makeText(GameActivity.this, "Saved", Toast.LENGTH_SHORT)
@@ -505,11 +509,11 @@ public class GameActivity extends Activity {
 		return r.nextInt(max - min + 1) + min;
 	}
 
-	protected void showNotification(double BMI) {
+	protected void showNotification(String msg) {
 		NotificationManager barManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
 		Notification barMsg = new Notification(R.drawable.ic_launcher,
-				String.valueOf(BMI), System.currentTimeMillis());
+				msg, System.currentTimeMillis());
 		PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
 				new Intent(this, GameActivity.class),
 				PendingIntent.FLAG_UPDATE_CURRENT);
@@ -536,20 +540,26 @@ public class GameActivity extends Activity {
 			public void onClick(DialogInterface dialog, int which) {
 				// TODO Auto-generated method stub
 				
-				finish_text = (EditText)findViewById(R.id.etname);
-				finish_name_text = (TextView)findViewById(R.id.tvname);
+				finish_text = (EditText)((AlertDialog)dialog).findViewById(R.id.etname);
+				finish_name_text = (TextView)((AlertDialog)dialog).findViewById(R.id.tvname);
+
 				player_name = finish_text.getText().toString();//這句必當
-				Toast.makeText(GameActivity.this, "你选择的id为" + which, Toast.LENGTH_SHORT).show();
+				showNotification(player_name);
+				//Toast.makeText(GameActivity.this, "你选择的id为" + which, Toast.LENGTH_SHORT).show();
 				writeRecord(FileName);
+				
+				Intent intent = new Intent();
+				intent.setClass(GameActivity.this, Ranking.class);
+				startActivityForResult(intent, RANK_REQUEST);
 				
 			}
 		};
 		DialogInterface.OnClickListener Pos_ClickListener = new DialogInterface.OnClickListener() {
 			
 			@Override
-			public void onClick(DialogInterface dialog, int which) {
+			public void onClick(DialogInterface dialog, int which) {//重新一局
 				// TODO Auto-generated method stub
-				Toast.makeText(GameActivity.this, "你选择的id为" + which, Toast.LENGTH_SHORT).show();
+				//Toast.makeText(GameActivity.this, "你选择的id为" + which, Toast.LENGTH_SHORT).show();
 			}
 		};
 		
