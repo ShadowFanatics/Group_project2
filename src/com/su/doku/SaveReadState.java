@@ -17,17 +17,25 @@ public class SaveReadState {
 	int puzzleScale = 9;
 	int queueSize = 3;
 	int[][] puzzle = new int[puzzleScale][puzzleScale];
-	int[][] currentMatrix = new int[puzzleScale][puzzleScale];
+	int[][] showMatrix = new int[puzzleScale][puzzleScale];
 	int[] queue = new int[queueSize];
-	double time = 0;
+	int[] dragCorrect;
+	int time = 0;
+	int saveLevel;
+	int saveScore;
 	String filename = "CurrentState.txt";
 	File fileDir = new File(Environment.getExternalStorageDirectory().getPath()
 			+ "/SuDoKu");
 
-	public void SaveState(int[][] puzzle, int[][] currentMatrix, int[] queue) {
+	public void SaveState(int[][] puzzle, int[][] currentMatrix, int[] queue,
+			int[] dragCorrect, int level, int time, int score) {
+		this.saveLevel = level;
 		this.puzzle = puzzle;
-		this.currentMatrix = currentMatrix;
+		this.showMatrix = currentMatrix;
 		this.queue = queue;
+		this.dragCorrect = dragCorrect;
+		this.time = time;
+		this.saveScore = score;
 		WriteFile();
 	}
 
@@ -39,10 +47,16 @@ public class SaveReadState {
 
 		try {
 			file = new File(fileDir.getAbsolutePath() + "/" + filename);
+			file.delete();
 			file.createNewFile();
 			// ���I�s�X�榡�A�H�KŪ���ɤ���r�Ų��`
 			writer = new BufferedWriter(new OutputStreamWriter(
 					new FileOutputStream(file, true), "UTF-8"));
+
+			// level
+			writer.append(String.valueOf(saveLevel));
+			writer.newLine();
+			writer.flush();
 
 			// �x�s���ׯx�}
 			for (int i = 0; i < puzzleScale; i++) {
@@ -56,7 +70,7 @@ public class SaveReadState {
 			// �x�s�ثe��g���x�}
 			for (int i = 0; i < puzzleScale; i++) {
 				for (int j = 0; j < puzzleScale; j++) {
-					writer.append(currentMatrix[i][j] + " ");
+					writer.append(showMatrix[i][j] + " ");
 				}
 				writer.newLine();
 			}
@@ -69,8 +83,20 @@ public class SaveReadState {
 			writer.newLine();
 			writer.flush();
 
-			// �x�s�ثe�ɶ�
+			// dragCorrect
+			for (int i = 0; i < dragCorrect.length; i++) {
+				writer.append(dragCorrect[i] + " ");
+			}
+			writer.newLine();
+			writer.flush();
+
+			// time
 			writer.append(String.valueOf(time));
+			writer.newLine();
+			writer.flush();
+
+			// score
+			writer.append(String.valueOf(saveScore));
 			writer.newLine();
 			writer.flush();
 
@@ -93,6 +119,9 @@ public class SaveReadState {
 		try {
 			file = new File(fileDir.getAbsolutePath() + "/" + filename);
 			reader = new Scanner(file);
+			
+			//level
+			saveLevel = reader.nextInt();
 			// Ū�����ׯx�}
 			for (int i = 0; i < puzzleScale; i++) {
 				for (int j = 0; j < puzzleScale; j++) {
@@ -102,15 +131,22 @@ public class SaveReadState {
 			// Ū���ثe��g���x�}
 			for (int i = 0; i < puzzleScale; i++) {
 				for (int j = 0; j < puzzleScale; j++) {
-					currentMatrix[i][j] = reader.nextInt();
+					showMatrix[i][j] = reader.nextInt();
 				}
 			}
 			// Ū���ثequeue�̭����Ʀr
 			for (int i = 0; i < queueSize; i++) {
 				queue[i] = reader.nextInt();
 			}
+			// dragCorrect
+			dragCorrect = new int[(saveLevel + 1) * 9];
+			for (int i = 0; i < (saveLevel + 1) * 9; i++) {
+				dragCorrect[i] = reader.nextInt();
+			}
 			// �x�s�ثe�ɶ�
-			time = reader.nextDouble();
+			time = reader.nextInt();
+			//score
+			saveScore = reader.nextInt();
 
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
@@ -137,15 +173,26 @@ public class SaveReadState {
 		return puzzle;
 	}
 
-	public int[][] getUserMatrix() {
-		return currentMatrix;
+	public int[][] getShowMatrix() {
+		return showMatrix;
 	}
 
-	public double getTime() {
+	public int getTime() {
 		return time;
 	}
-
+	
+	public int getLevel() {
+		return saveLevel;
+	}
+	public int getScore() {
+		return saveScore;
+	}
+	
 	public int[] getQueue() {
 		return queue;
+	}
+	
+	public int[] getDragCorrect() {
+		return dragCorrect;
 	}
 }
