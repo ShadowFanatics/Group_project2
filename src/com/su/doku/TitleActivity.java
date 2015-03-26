@@ -4,11 +4,14 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 
 public class TitleActivity extends Activity
 {
@@ -18,6 +21,8 @@ public class TitleActivity extends Activity
 	private Button continueButton;
 	private Button rankButton;
 	private Button exitButton;
+	private static int drawble_title = R.drawable.title;
+	private LinearLayout layout;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -76,6 +81,11 @@ public class TitleActivity extends Activity
 		rankButton.setOnClickListener(rankButtonListener);
 		exitButton = (Button) findViewById(R.id.button_exit);
 		exitButton.setOnClickListener(exitButtonListener);
+		
+		
+		layout = (LinearLayout)findViewById(R.id.RelativeLayout1);
+		layout.setBackground(this.getResources().getDrawable(drawble_title));
+		
 	}
 	
 	private Button.OnClickListener startButtonListener = new Button.OnClickListener()
