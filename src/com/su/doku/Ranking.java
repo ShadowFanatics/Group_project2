@@ -107,7 +107,7 @@ public class Ranking extends Activity{
 				}
 				i++;
 				if(i >= 10){
-					j = i % 10 + j;
+					j++;
 					i = i / 10;
 				}
 			}
