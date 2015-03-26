@@ -57,6 +57,7 @@ public class Ranking extends Activity{
 			R.drawable.record_number_4, R.drawable.record_number_5, R.drawable.record_number_6,
 			R.drawable.record_number_7, R.drawable.record_number_8, R.drawable.record_number_9,
 			R.drawable.crown};
+		private static int cup[] = {R.drawable.gold, R.drawable.silver, R.drawable.bronze};
 		private int display_width, display_height;
 		private static final String FileName = "record.txt";
 		File fileDir;
@@ -79,8 +80,8 @@ public class Ranking extends Activity{
 					//Date date2 = stringToDate(rhs.getTSec());
 					int n1 = Integer.parseInt(lhs.getTSec());
 					int n2 = Integer.parseInt(rhs.getTSec());
-					//由大排到小
-					if(n1 < n2){
+					//由小排到大
+					if(n1 > n2){
 						return 1;
 					}
 					return -1;
@@ -93,7 +94,7 @@ public class Ranking extends Activity{
 	        while (it.hasNext()) {
 	        	RankData rankData = it.next(); 
 	        	if(j == 0 && i <= 3){
-	        		rankData.setIcon1(getResources().getDrawable(images[10]));
+	        		rankData.setIcon1(getResources().getDrawable(cup[i-1]));
 	        		rankData.setIcon2(getResources().getDrawable(images[i]));
 	        	}
 	        	else {
@@ -116,7 +117,7 @@ public class Ranking extends Activity{
 				public void onItemClick(AdapterView<?> parent, View view,
 						int position, long id) {
 					// TODO Auto-generated method stub
-					Toast.makeText(Ranking.this, "當前選中列表項為：" + position, Toast.LENGTH_SHORT).show();
+					Toast.makeText(Ranking.this, "輕觸一下表單 回到主畫面", Toast.LENGTH_SHORT).show();
 					Ranking.this.finish();				
 				}
 	        	
@@ -241,10 +242,10 @@ public class Ranking extends Activity{
 	            holder.textVeiw2.setText(mList.get(position).getName());
 	            holder.timerView.setText("記錄：" + mList.get(position).getTSec());
 	            
-	            holder.imageview1.getLayoutParams().height = display_height / 10;
-	            holder.imageview1.getLayoutParams().width = display_width / 10;
-	            holder.imageview2.getLayoutParams().height = display_height / 10;
-	            holder.imageview2.getLayoutParams().width = display_width / 10;
+	            holder.imageview1.getLayoutParams().height = display_height / 9;
+	            holder.imageview1.getLayoutParams().width = display_width / 9;
+	            holder.imageview2.getLayoutParams().height = display_height / 9;
+	            holder.imageview2.getLayoutParams().width = display_width / 9;
 	            /*holder.button.setOnClickListener(new View.OnClickListener() {
 					
 					@Override
