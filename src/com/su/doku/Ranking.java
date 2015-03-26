@@ -2,12 +2,14 @@ package com.su.doku;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -20,6 +22,13 @@ import java.util.Scanner;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Matrix;
+import android.graphics.PixelFormat;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.DisplayMetrics;
@@ -48,9 +57,10 @@ public class Ranking extends Activity{
 			R.drawable.record_number_4, R.drawable.record_number_5, R.drawable.record_number_6,
 			R.drawable.record_number_7, R.drawable.record_number_8, R.drawable.record_number_9,
 			R.drawable.crown};
-		private int width, height;
-		private File fileDir;
-		private static final String Filename = "Record.txt";
+		private int display_width, display_height;
+		private static final String FileName = "record.txt";
+		File fileDir;
+		
 		private static final String TAG = "Ranking_activity";
 	    /** Called when the activity is first created. */  
 	    @Override  
@@ -125,21 +135,20 @@ public class Ranking extends Activity{
 			//mListlist.add(new RankData("67","2012-12-12 00:67","tsu"));
 			//mListlist.add(new RankData("18","2012-12-12 00:18","hi"));
 			
-			readState(Filename);
+			readState(FileName);
 			
 			DisplayMetrics displayMetrics = new DisplayMetrics();
 			getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-			width = displayMetrics.widthPixels;
-			height = displayMetrics.heightPixels;
-			Toast.makeText(Ranking.this, width + ":width" + height + "height", Toast.LENGTH_LONG).show();;
+			display_width = displayMetrics.widthPixels;
+			display_height = displayMetrics.heightPixels;
+			//Toast.makeText(Ranking.this, display_width + ":width" + display_height + "height", Toast.LENGTH_LONG).show();;
 		}
 	    
 	    
 		private void readState(String filename) {
 			File file = null;
 			Scanner reader = null;
-			
-			
+					
 			try {
 				file = new File(Environment.getExternalStorageDirectory().getPath() + "/SuDoKu/" + filename);
 				reader = new Scanner(file);
@@ -150,8 +159,7 @@ public class Ranking extends Activity{
 					String[] split = tmp.split(",");
 					mListlist.add(new RankData(split[0],split[1],split[2]));
 				}
-				Toast.makeText(Ranking.this, "Loaded", Toast.LENGTH_SHORT)
-						.show();
+				Toast.makeText(Ranking.this, "Loaded", Toast.LENGTH_SHORT).show();
 
 			} catch (FileNotFoundException e) {
 				Toast.makeText(Ranking.this, "Can not find file",
@@ -172,7 +180,41 @@ public class Ranking extends Activity{
 	    	return dateValue;
 		}*/
 	    
-	    
+		
+	    private void loadRecord(String filename){
+	    	File file = null;
+			Scanner reader = null;
+
+	    	try {
+	    		file = new File(Environment.getExternalStorageDirectory().getPath() + "/SuDoKu/" + filename);
+	    		reader = new Scanner(file);
+	    		
+	    		String tmp;
+	    		while( reader.hasNextLine() == true){
+	    			tmp = reader.nextLine();
+	    			String[] spilt = tmp.split(",");
+					mListlist.add(new RankData(spilt[0], spilt[1], spilt[2]));
+					//第一個是總秒數，日期時間，玩家名字
+	    		}
+	    		
+				Toast.makeText(Ranking.this, "Loaded", Toast.LENGTH_SHORT)
+				.show();
+			} catch(FileNotFoundException e){
+				Toast.makeText(Ranking.this, "Cannot find file",
+						Toast.LENGTH_SHORT).show();
+			}
+	    	catch (Exception e) {
+					// TODO: handle exception
+				Toast.makeText(Ranking.this, "Loading Failed",
+						Toast.LENGTH_SHORT).show();
+	    	}
+	    	finally{
+	    		reader.close();
+	    	}
+	    }
+    	
+		
+		
 	    public class MyAdapter extends BaseAdapter {  
 	    	  
 	        private Context mContext;  
@@ -220,8 +262,8 @@ public class Ranking extends Activity{
 	                holder.textView1 = (TextView) convertView.findViewById(R.id.smalltv);  
 	                holder.textVeiw2 = (TextView) convertView.findViewById(R.id.bigtv);
 	                holder.timerView = (TextView) convertView.findViewById(R.id.timertv);
-	                holder.imageview1 = (ImageView)convertView.findViewById(R.id.iv1);
-	                holder.imageview2 = (ImageView)convertView.findViewById(R.id.iv2);
+	                holder.imageview1 = (ImageView)convertView.findViewById(R.id.iv_1);
+	                holder.imageview2 = (ImageView)convertView.findViewById(R.id.iv_2);
 	               // holder.button = (Button)convertView.findViewById(R.id.bn);
 	                
 	                convertView.setTag(holder);
@@ -229,16 +271,16 @@ public class Ranking extends Activity{
 	                holder = (ViewHolder) convertView.getTag();  
 	            }  
 	      
+	            holder.imageview1.setImageDrawable(mList.get(position).getIcon1());
+	            holder.imageview2.setImageDrawable(mList.get(position).getIcon2());
 	            holder.textView1.setText(mList.get(position).getDate());  
 	            holder.textVeiw2.setText(mList.get(position).getName());
 	            holder.timerView.setText("記錄：" + mList.get(position).getTSec());
-	            holder.imageview1.setImageDrawable(mList.get(position).getIcon1());
-	            holder.imageview2.setImageDrawable(mList.get(position).getIcon2());
 	            
-	            holder.imageview1.getLayoutParams().height = height / 10;
-	            holder.imageview1.getLayoutParams().width = width / 10;
-	            holder.imageview2.getLayoutParams().height = height / 10;
-	            holder.imageview2.getLayoutParams().width = width / 10;
+	            holder.imageview1.getLayoutParams().height = display_height / 10;
+	            holder.imageview1.getLayoutParams().width = display_width / 10;
+	            holder.imageview2.getLayoutParams().height = display_height / 10;
+	            holder.imageview2.getLayoutParams().width = display_width / 10;
 	            /*holder.button.setOnClickListener(new View.OnClickListener() {
 					
 					@Override
@@ -249,11 +291,38 @@ public class Ranking extends Activity{
 		                Ranking.this.finish();
 					}
 				});*/
-	     
 	            return convertView;  
 			}
 			
 			
-	      
-	    } 
+		    /*private Bitmap scaleBitmap(Bitmap bitmap){
+		    		
+		    	int width = bitmap.getWidth();
+		    	int height = bitmap.getHeight();
+		    	int new_width = display_width / 4 - 30;
+		    	int new_height = display_height / 5;
+		    	float scaleWidth = ((float) new_width ) / width;
+		    	float scaleHeight = ((float) new_height ) / height;
+		    	Matrix matrix = new Matrix();
+		    	matrix.postScale(scaleWidth, scaleHeight);
+		    	Bitmap newbmp = Bitmap.createBitmap(bitmap, 0, 0, width, height, matrix, true);
+		    	return newbmp;
+		    };
+		    
+		    private Bitmap drawableToBitmap(Drawable drawable) {   
+		        int w = drawable.getIntrinsicWidth();  
+		        int h = drawable.getIntrinsicHeight();  
+		   
+		        Bitmap.Config config = drawable.getOpacity() != PixelFormat.OPAQUE ? Bitmap.Config.ARGB_8888  
+		                : Bitmap.Config.RGB_565;  
+		        Bitmap bitmap = Bitmap.createBitmap(w, h, config);  
+		        Canvas canvas = new Canvas(bitmap);  
+		        drawable.setBounds(0, 0, w, h);   
+		        drawable.draw(canvas);
+		        
+		        return bitmap;  
+		    */
+	    }
+
+
 }

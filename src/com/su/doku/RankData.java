@@ -6,6 +6,7 @@ public class RankData {
 	private String name;
 	private String tsec;
 	private String date;
+	//private String time_string;
 	private Drawable icon1;
 	private Drawable icon2;
 	

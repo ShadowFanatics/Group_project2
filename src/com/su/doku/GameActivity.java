@@ -1,5 +1,7 @@
 package com.su.doku;
 
+
+import java.util.Random;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -12,6 +14,9 @@ import java.util.TimerTask;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.ClipData;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
@@ -28,11 +33,14 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnDragListener;
 import android.view.View.OnTouchListener;
+import android.view.animation.Animation;
+import android.view.animation.TranslateAnimation;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -51,18 +59,26 @@ public class GameActivity extends Activity
 	private Button finishButton;
 	
 	private GridLayout gridLayout;
+	private LinearLayout linearLayout;
 	private SudokuUnit[][] sudokuUnits;
-	private ImageView imageView1;
+	private DragUnit dragUnits[];
 	private Button resetButton;
 	private Button backButton;
 	
 	private int answer[][] = new int[9][9];
 	private int givenNumber[][] = new int[9][9];
+	private int userMatrix[][] = new int[9][9];
+	private int saveQueue[] = new int[5];
 	private int time = 0;
-	private int number = 1;
+	private DragUnit isDraging;
 	
-	private final int sudokuSize = 9;
-	
+	private final int sudokuSize = 9;	
+	private SaveReadState saveObject = new SaveReadState();
+	private int level;
+	private int totalBlock;
+	private int remainBlock;
+	private int preferSize;
+	private final int queueSize = 5;
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
@@ -71,10 +87,15 @@ public class GameActivity extends Activity
 		
 		produce sudokuProduce = new produce();
 		answer = sudokuProduce.generatePuzzleMatrix();
-		givenNumber = sudokuProduce.generatePuzzleQuestion(2);
+		level = 1;
+		totalBlock = (level+1) * 9;
+		remainBlock = totalBlock;
+		dragUnits = new DragUnit[totalBlock];
+		givenNumber = sudokuProduce.generatePuzzleQuestion(level);
 		
-		initializeViews();
 		receiveData();
+		initializeViews();
+		
 	}
 	
 	/*
@@ -90,22 +111,27 @@ public class GameActivity extends Activity
 		timeTextView = (TextView) findViewById(R.id.textView_time);
 		timeTextView.setText(String.valueOf(time));
 		
-		//�ΨӨ��o�ù��j�p
+		//用來取得螢幕大小
 		DisplayMetrics displayMetrics = new DisplayMetrics();
 		getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-		int preferSize = displayMetrics.widthPixels/10;
+		preferSize = displayMetrics.widthPixels/sudokuSize;
 		
 		gridLayout = (GridLayout) findViewById(R.id.GridLayout1);
 		sudokuUnits = new SudokuUnit[sudokuSize][sudokuSize];
+		int dragUnitCount = 0;
 		for(int i = 0; i < sudokuSize; i++)
 		{
 			for(int j = 0; j < sudokuSize; j++)
 			{
 				if ( givenNumber[i][j] == 1 ) {
 					sudokuUnits[i][j] = new SudokuUnit(GameActivity.this, i, j, answer[i][j]);
+					userMatrix[i][j] = answer[i][j];
 				}
 				else {
 					sudokuUnits[i][j] = new SudokuUnit(GameActivity.this, i, j, 0);
+					userMatrix[i][j] = 0;
+					dragUnits[dragUnitCount] = new DragUnit(GameActivity.this,answer[i][j],dragUnitCount);
+					dragUnitCount++;
 				}
 				sudokuUnits[i][j].setOnDragListener(dragListener);
 				gridLayout.addView(sudokuUnits[i][j], i*sudokuSize+j);
@@ -114,8 +140,7 @@ public class GameActivity extends Activity
 				sudokuUnits[i][j].getLayoutParams().width = preferSize;
 			}
 		}
-		imageView1 = (ImageView) findViewById(R.id.imageView1);
-		imageView1.setOnTouchListener(touchListener);
+		
 		resetButton = (Button) findViewById(R.id.button_reset);
 		resetButton.setOnClickListener(resetButtonListener);
 		backButton = (Button) findViewById(R.id.button_back);
@@ -128,6 +153,8 @@ public class GameActivity extends Activity
 		
 		gameTimer = new Timer();
 		gameTimer.schedule(timer_task, 0, 1000);
+		
+		linearLayout = (LinearLayout) findViewById(R.id.LinearLayout1);
 	}
 	
 	private void receiveData()
@@ -135,11 +162,36 @@ public class GameActivity extends Activity
 		Bundle bundle = getIntent().getExtras();
 		if(bundle.getBoolean("isStart"))
 		{
-			// TODO �ͦ��s�C��
+			// TODO 生成新遊戲
 		}
 		else
 		{
-			// TODO Ū���������C����T
+			// TODO 讀取未完成遊戲資訊
+			saveObject.ReadState();
+			answer = saveObject.getAnswer();
+			userMatrix = saveObject.getUserMatrix();
+			for ( int i = 0; i < 9; i++ ) {
+				for ( int j = 0; j < 9; j++ ) {
+					if ( userMatrix[i][j] == 0 ) {
+						givenNumber[i][j] = 0;
+					}
+					else {
+						givenNumber[i][j] = 1;
+					}
+					
+				}
+			}
+			
+			
+			/*int readQueue[] = saveObject.getQueue();
+			for ( int i = 0; i < readQueue.length; i++ ) {
+				int index = readQueue[i];
+				dragUnits[index].showInQueue();
+				linearLayout.addView(dragUnits[index]);
+				dragUnits[index].getLayoutParams().height = preferSize;
+				dragUnits[index].getLayoutParams().width = preferSize;
+				dragUnits[index].setOnTouchListener(touchListener);
+			}*/
 		}
 	}
 	
@@ -148,11 +200,15 @@ public class GameActivity extends Activity
 		@Override
 		public boolean onTouch(View v, MotionEvent event)
 		{
-			//�e�̧ڶö�,�]�S�Ψ�; ��̬O���a�����
-			ClipData clipData = ClipData.newPlainText("number", number+"");
-			//�Ф@�Ӹ�imageView1���o�@�˪�shadow
-			View.DragShadowBuilder shadowBuilder = new View.DragShadowBuilder(imageView1);
+			//前者我亂填的,也沒用到; 後者是夾帶的資料
+			DragUnit temp = (DragUnit)v;
+			ClipData clipData = ClipData.newPlainText("number", temp.getNumber()+"");
+			//創一個跟imageView1長得一樣的shadow
+			View.DragShadowBuilder shadowBuilder = new View.DragShadowBuilder(v);
 			v.startDrag(clipData, shadowBuilder, null, 0);
+			isDraging = temp;
+			linearLayout.removeView(v);
+			temp.removeFromQueue();
 			return true;
 		}
 	};
@@ -172,13 +228,21 @@ public class GameActivity extends Activity
 				break;
 			case DragEvent.ACTION_DRAG_EXITED:
 				break;
-			case DragEvent.ACTION_DROP:	//��Q�즲�����󲾰ʨ즹view���d��é�U��
+			case DragEvent.ACTION_DROP:	//當被拖曳的物件移動到此view的範圍並放下時
 				SudokuUnit sudokuUnit = (SudokuUnit) v;
-				//���o���a���
+				//取得夾帶資料
 				int data = Integer.parseInt(event.getClipData().getItemAt(0).getText().toString());
 				if(data == answer[sudokuUnit.getIndexX()][sudokuUnit.getIndexY()])
 				{
 					sudokuUnit.setNumber(data);
+					userMatrix[sudokuUnit.getIndexX()][sudokuUnit.getIndexY()] = data;
+					remainBlock--;
+					isDraging.correct();
+				}
+				isDraging = null;
+				//判斷結束沒
+				if (remainBlock == 0 ) {
+					
 				}
 				break;
 			case DragEvent.ACTION_DRAG_ENDED:
@@ -241,6 +305,7 @@ public class GameActivity extends Activity
 			super.handleMessage(msg);
 			switch (msg.what) {
 			case 1:
+				time++;
 				csec = tsec % 60;
 				cmin = tsec / 60;
 				String s = "";
@@ -259,8 +324,11 @@ public class GameActivity extends Activity
 				//if(startFlag = false){
 				//	gameTimer.cancel();
 				//}
+				if ( time % 5 == 0 ) {
+					generateDargUnit();
+				}
+				
 				break;
-
 			default:
 				break;
 			}
@@ -333,7 +401,7 @@ public class GameActivity extends Activity
 			@Override
 			public void onClick(DialogInterface dialog, int which)
 			{
-				// TODO ���m�C��
+				// TODO 重置遊戲
 			}
 		})
 		.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener()
@@ -357,13 +425,18 @@ public class GameActivity extends Activity
 			@Override
 			public void onClick(DialogInterface dialog, int which)
 			{
-				// TODO �^�ǹC�����
-				Bundle bundle = new Bundle();
+				// TODO 回傳遊戲資料
+				/*Bundle bundle = new Bundle();
 				
 				Intent intent = new Intent();
 				intent.putExtras(bundle);
-				setResult(RESULT_OK, intent);
-				
+				setResult(RESULT_OK, intent);*/
+				showNotification(linearLayout.getChildCount());
+				for ( int i = 0; i < linearLayout.getChildCount(); i++ ) {
+					DragUnit temp = (DragUnit)linearLayout.getChildAt(i);
+					saveQueue[i] = temp.getIndex();
+				}
+				saveObject.SaveState(answer, userMatrix, saveQueue);
 				//back to title
 				GameActivity.this.finish();
 			}
@@ -379,6 +452,61 @@ public class GameActivity extends Activity
 		.show();
 	}
 	
+
+	private void generateDargUnit() {
+		int queueNumber = linearLayout.getChildCount();
+		if (remainBlock == 0 || queueNumber >= queueSize) {
+			return;
+		}
+		int index = getRandomInt(0,totalBlock-1);
+		while(dragUnits[index].isCorrect() || dragUnits[index].isInQueue() || dragUnits[index] == isDraging) {
+			index = getRandomInt(0,totalBlock-1);
+		}
+		dragUnits[index].showInQueue();
+		linearLayout.addView(dragUnits[index]);
+		dragUnits[index].getLayoutParams().height = preferSize;
+		dragUnits[index].getLayoutParams().width = preferSize;
+		dragUnits[index].setOnTouchListener(touchListener);
+		
+		Animation am = new TranslateAnimation( (6-queueNumber)*preferSize, 0, 0, 0 );
+	    
+	    // 動畫開始到結束的執行時間 (1000 = 1 秒)
+	    am.setDuration( 1000 );
+	    
+	    // 動畫重複次數 (-1 表示一直重複)
+	    am.setRepeatCount(0);
+	    dragUnits[index].setAnimation(am);
+	    am.startNow();
+	}
+	
+	private int getRandomInt(int min, int max) {
+		Random r = new Random();
+		return r.nextInt(max - min + 1) + min;
+	}
+	
+	protected void showNotification(double BMI)
+    {
+    	NotificationManager barManager = 
+    	(NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+    
+   	 Notification barMsg = new Notification(
+   	 R.drawable.ic_launcher,
+    	String.valueOf(BMI),
+    	System.currentTimeMillis()
+   	 );
+ 	PendingIntent contentIntent = PendingIntent.getActivity(   this,   0,  
+                        new  Intent(this,GameActivity.class),
+  	PendingIntent.FLAG_UPDATE_CURRENT);
+    
+   	barMsg.setLatestEventInfo(
+    	GameActivity.this, 
+   	 "您的BMI值過高", 
+   	 "你該節食了",
+    	contentIntent
+   	 );
+  	  barManager.notify(0,barMsg);    
+    }
+
 	private void showfinishDialog(){
 		LayoutInflater inflater = getLayoutInflater();
 		View layout = inflater.inflate(R.layout.dialog, (ViewGroup)findViewById(R.id.dialog));
@@ -400,4 +528,5 @@ public class GameActivity extends Activity
 		.setPositiveButton("重新一局", null).show();
 		
 	}
+
 }
