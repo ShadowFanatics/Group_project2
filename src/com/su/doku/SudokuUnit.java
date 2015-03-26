@@ -14,6 +14,7 @@ public class SudokuUnit extends ImageView {
 		super(context);
 		this.indexX = indexX;
 		this.indexY = indexY;
+		setBackground(getResources().getDrawable(images[0]));
 		setImageDrawable(getResources().getDrawable(images[number]));
 		setPadding(0, 0, 0, 0);
 	}

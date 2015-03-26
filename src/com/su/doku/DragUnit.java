@@ -14,6 +14,7 @@ public class DragUnit extends ImageView {
 	private boolean isInQueue = false;
 	public DragUnit(Context context, int number, int index) {
 		super(context);
+		setBackground(getResources().getDrawable(images[0]));
 		setImageDrawable(getResources().getDrawable(images[number]));
 		setPadding(0, 0, 0, 0);
 		this.number = number;
