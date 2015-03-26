@@ -178,43 +178,7 @@ public class Ranking extends Activity{
 			SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 			Date dateValue = simpleDateFormat.parse(rankString, position);
 	    	return dateValue;
-		}*/
-	    
-		
-	    private void loadRecord(String filename){
-	    	File file = null;
-			Scanner reader = null;
-
-	    	try {
-	    		file = new File(Environment.getExternalStorageDirectory().getPath() + "/SuDoKu/" + filename);
-	    		reader = new Scanner(file);
-	    		
-	    		String tmp;
-	    		while( reader.hasNextLine() == true){
-	    			tmp = reader.nextLine();
-	    			String[] spilt = tmp.split(",");
-					mListlist.add(new RankData(spilt[0], spilt[1], spilt[2]));
-					//第一個是總秒數，日期時間，玩家名字
-	    		}
-	    		
-				Toast.makeText(Ranking.this, "Loaded", Toast.LENGTH_SHORT)
-				.show();
-			} catch(FileNotFoundException e){
-				Toast.makeText(Ranking.this, "Cannot find file",
-						Toast.LENGTH_SHORT).show();
-			}
-	    	catch (Exception e) {
-					// TODO: handle exception
-				Toast.makeText(Ranking.this, "Loading Failed",
-						Toast.LENGTH_SHORT).show();
-	    	}
-	    	finally{
-	    		reader.close();
-	    	}
-	    }
-    	
-		
-		
+		}*/	
 	    public class MyAdapter extends BaseAdapter {  
 	    	  
 	        private Context mContext;  

@@ -4,11 +4,13 @@ package com.su.doku;
 import java.util.Random;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Scanner;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -54,6 +56,7 @@ public class GameActivity extends Activity
 	private static final String FileName = "record.txt";
 	private String player_name = "";
 	private EditText finish_text;
+	private TextView finish_name_text;
 	private File fileDir;
 	
 	private Button finishButton;
@@ -146,7 +149,6 @@ public class GameActivity extends Activity
 		backButton = (Button) findViewById(R.id.button_back);
 		backButton.setOnClickListener(backButtonListener);
 		
-		finish_text = (EditText)findViewById(R.id.etname);
 		
 		finishButton = (Button) findViewById(R.id.button_finish);
 		finishButton.setOnClickListener(finishButtonListener);
@@ -351,10 +353,11 @@ public class GameActivity extends Activity
 		}
 	}
     
-    private void writeRecord(String filename){
+    private void writeRecord(String filename){//這write會蓋掉每次的資料 write之前要先read也許
     	if(FindDirectoryPath()){
     		BufferedWriter writer = null;
 			File file = null;
+			//Scanner reader = null;
 			
 			//抓時間日期
 			SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm");
@@ -363,11 +366,10 @@ public class GameActivity extends Activity
     		try {
     			file = new File(fileDir.getAbsolutePath() + "/" + filename);
 				writer = new BufferedWriter(new OutputStreamWriter(
-						new FileOutputStream(file, false), "UTF-8"));
-				
+						new FileOutputStream(file, true), "UTF-8"));
 				writer.append(String.valueOf(tsec) + ",");
 				writer.append(str + ",");
-				writer.append(player_name);
+				writer.append("肉餅臉");
 				writer.newLine();
 				writer.flush();
 				Toast.makeText(GameActivity.this, "Saved", Toast.LENGTH_SHORT)
@@ -388,7 +390,7 @@ public class GameActivity extends Activity
 				}
     		}
     	}
-    }
+    }  
 	//end
 	
 	private void showResetDialog()
@@ -510,23 +512,39 @@ public class GameActivity extends Activity
 	private void showfinishDialog(){
 		LayoutInflater inflater = getLayoutInflater();
 		View layout = inflater.inflate(R.layout.dialog, (ViewGroup)findViewById(R.id.dialog));
-			
-		new AlertDialog.Builder(GameActivity.this)
-		.setTitle(R.string.finish_dialoag_title)
-		.setIcon(android.R.drawable.ic_dialog_info)
-		.setView(layout)
-		.setNegativeButton("確定", new DialogInterface.OnClickListener() {
+		
+		
+		AlertDialog.Builder MyAlertDialog = new AlertDialog.Builder(this);
+		MyAlertDialog.setTitle(R.string.finish_dialoag_title);
+		MyAlertDialog.setIcon(android.R.drawable.ic_dialog_info);
+		MyAlertDialog.setView(layout);
+		
+		DialogInterface.OnClickListener Neg_ClickListener = new DialogInterface.OnClickListener() {
 			
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				// TODO Auto-generated method stub
 				
-				player_name = finish_text.getText().toString();//這行狂當 我不知為什麼ＱＱ
-				//要存檔 call writeRecord(FileName)
+				finish_text = (EditText)findViewById(R.id.etname);
+				finish_name_text = (TextView)findViewById(R.id.tvname);
+				//player_name = finish_text.getText().toString();//這句必當
+				Toast.makeText(GameActivity.this, "你选择的id为" + which, Toast.LENGTH_SHORT).show();
+				writeRecord(FileName);
+				
 			}
-		})
-		.setPositiveButton("重新一局", null).show();
+		};
+		DialogInterface.OnClickListener Pos_ClickListener = new DialogInterface.OnClickListener() {
+			
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				// TODO Auto-generated method stub
+				Toast.makeText(GameActivity.this, "你选择的id为" + which, Toast.LENGTH_SHORT).show();
+			}
+		};
 		
+		MyAlertDialog.setNegativeButton("確定", Neg_ClickListener);
+		MyAlertDialog.setPositiveButton("重新一局", Pos_ClickListener);
+		MyAlertDialog.create().show();			
 	}
 
 }
