@@ -8,7 +8,9 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.Scanner;
 
+import android.os.Environment;
 import android.widget.Button;
+import android.widget.Toast;
 
 public class SaveReadState {
 
@@ -18,7 +20,9 @@ public class SaveReadState {
 	int[][] currentMatrix = new int[puzzleScale][puzzleScale];
 	int[] queue = new int[queueSize];
 	double time = 0;
-	String filePath = "/SuDoKu/CurrentState.txt";
+	String filename = "CurrentState.txt";
+	File fileDir = new File(Environment.getExternalStorageDirectory().getPath()
+			+ "/SuDoKu");
 
 	public void SaveState(int[][] puzzle, int[][] currentMatrix, int[] queue) {
 		this.puzzle = puzzle;
@@ -28,11 +32,13 @@ public class SaveReadState {
 	}
 
 	private void WriteFile() {
+		if (!FindDirectoryPath())
+			return;
 		BufferedWriter writer = null;
 		File file = null;
 
 		try {
-			file = new File(filePath);
+			file = new File(fileDir.getAbsolutePath() + "/" + filename);
 			file.createNewFile();
 			// ���I�s�X�榡�A�H�KŪ���ɤ���r�Ų��`
 			writer = new BufferedWriter(new OutputStreamWriter(
@@ -85,7 +91,7 @@ public class SaveReadState {
 		File file = null;
 		Scanner reader = null;
 		try {
-			file = new File(filePath);
+			file = new File(fileDir.getAbsolutePath() + "/" + filename);
 			reader = new Scanner(file);
 			// Ū�����ׯx�}
 			for (int i = 0; i < puzzleScale; i++) {
@@ -112,6 +118,18 @@ public class SaveReadState {
 			e.printStackTrace();
 		} finally {
 			reader.close();
+		}
+	}
+
+	private boolean FindDirectoryPath() {
+		if (Environment.getExternalStorageState().equals(
+				Environment.MEDIA_REMOVED)) {
+
+			return false;
+		} else {
+			if (!fileDir.exists())
+				fileDir.mkdirs();
+			return true;
 		}
 	}
 
