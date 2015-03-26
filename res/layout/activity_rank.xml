@@ -5,7 +5,12 @@
     android:orientation="horizontal" >
 
     <ImageView
-        android:id="@+id/iv"
+        android:id="@+id/iv1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+									  />
+    <ImageView
+        android:id="@+id/iv2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
 									  />
@@ -26,16 +31,16 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="12sp" />
-          
-	</LinearLayout>
-			
-    
-    
-    <TextView
+        <TextView
         android:id="@+id/timertv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="20sp" />
+	</LinearLayout>
+			
+    
+    
+
     <!--
     <Button
         android:id="@+id/bn"
