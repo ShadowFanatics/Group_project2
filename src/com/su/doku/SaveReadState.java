@@ -15,7 +15,7 @@ import android.widget.Toast;
 public class SaveReadState {
 
 	int puzzleScale = 9;
-	int queueSize = 3;
+	int queueSize = 5;
 	int[][] puzzle = new int[puzzleScale][puzzleScale];
 	int[][] showMatrix = new int[puzzleScale][puzzleScale];
 	int[] queue = new int[queueSize];

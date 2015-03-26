@@ -168,11 +168,11 @@ public class GameActivity extends Activity {
 			givenNumber = saveObject.getShowMatrix();
 			tsec = saveObject.getTime();
 			score = saveObject.getScore();
-			level = saveObject.getLevel(); // need read
+			level = saveObject.getLevel();
 			totalBlock = (level + 1) * 9;
 			remainBlock = totalBlock;
 			dragUnits = new DragUnit[totalBlock];
-			int dragUnitCorrect[] = new int[totalBlock];
+			int dragUnitCorrect[];
 			dragUnitCorrect = saveObject.getDragCorrect();
 			int dragUnitCount = 0;
 			for (int i = 0; i < sudokuSize; i++) {
