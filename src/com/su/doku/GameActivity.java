@@ -465,7 +465,7 @@ public class GameActivity extends Activity {
 	
 	private void generateDargUnit() {
 		int queueNumber = linearLayout.getChildCount();
-		if (remainBlock == 0 || queueNumber >= queueSize) {
+		if (remainBlock == 0 || queueNumber >= queueSize || queueNumber >= remainBlock ) {
 			return;
 		}
 		int index = getRandomInt(0, totalBlock - 1);
