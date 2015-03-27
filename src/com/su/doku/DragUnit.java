@@ -49,6 +49,8 @@ public class DragUnit extends RelativeLayout {
 
 		this.number = number;
 		this.queueIndex = index;
+		timer = new Timer();
+		timer.schedule(timer_task, 1000, 1000);
 	}
 
 	private TimerTask timer_task = new TimerTask() {
@@ -82,7 +84,7 @@ public class DragUnit extends RelativeLayout {
 						back.setImageDrawable(getResources().getDrawable(backs[scoreLevel]));
 					}
 					else {
-						timer.cancel();
+						//timer.cancel();
 					}
 				}
 				break;
@@ -106,13 +108,15 @@ public class DragUnit extends RelativeLayout {
 
 	public void showInQueue() {
 		scoreLevel = 0;
-		timer = new Timer();
-		timer.schedule(timer_task, 1000, 1000);
+		//timer = new Timer();
+	//	timer.schedule(timer_task, 1000, 1000);
 		isInQueue = true;
 	}
 
 	public void removeFromQueue() {
 		isInQueue = false;
+		
+		//timer = null;
 	}
 
 	public boolean isInQueue() {
@@ -124,6 +128,6 @@ public class DragUnit extends RelativeLayout {
 	}
 	
 	public int getScoreLevel() {
-		return 5 - scoreLevel;//inverse
+		return scoreLevel;//inverse
 	}
 }

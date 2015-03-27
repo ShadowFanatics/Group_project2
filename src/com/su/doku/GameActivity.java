@@ -338,7 +338,7 @@ public class GameActivity extends Activity {
 				// if(startFlag = false){
 				// gameTimer.cancel();
 				// }
-				if (tsec % 5 == 0) {
+				if (tsec % 3 == 0) {
 					generateDargUnit();
 				}
 
@@ -518,6 +518,7 @@ public class GameActivity extends Activity {
 				while(dragUnits[index].isCorrect() || dragUnits[index].isInQueue() || dragUnits[index] == isDraging) {
 					index++;
 				}
+				showNotification(String.valueOf(index));
 				break;
 			}
 		}
