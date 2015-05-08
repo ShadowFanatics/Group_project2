@@ -226,6 +226,7 @@ public class GameActivity extends Activity {
 			DragUnit temp = (DragUnit) v;
 			ClipData clipData = ClipData.newPlainText("number",
 					temp.getNumber() + "");
+			
 			// 創一個跟imageView1長得一樣的shadow
 			View.DragShadowBuilder shadowBuilder = new View.DragShadowBuilder(v);
 			v.startDrag(clipData, shadowBuilder, null, 0);
@@ -517,8 +518,9 @@ public class GameActivity extends Activity {
 				index = 0;
 				while(dragUnits[index].isCorrect() || dragUnits[index].isInQueue() || dragUnits[index] == isDraging) {
 					index++;
+					if (index > totalBlock - 1)
+						return;
 				}
-				showNotification(String.valueOf(index));
 				break;
 			}
 		}
@@ -545,19 +547,6 @@ public class GameActivity extends Activity {
 		return r.nextInt(max - min + 1) + min;
 	}
 
-	protected void showNotification(String msg) {
-		NotificationManager barManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-
-		Notification barMsg = new Notification(R.drawable.ic_launcher,
-				msg, System.currentTimeMillis());
-		PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
-				new Intent(this, GameActivity.class),
-				PendingIntent.FLAG_UPDATE_CURRENT);
-
-		barMsg.setLatestEventInfo(GameActivity.this, "您的BMI值過高", "你該節食了",
-				contentIntent);
-		barManager.notify(0, barMsg);
-	}
 
 	private void showfinishDialog() {
 		LayoutInflater inflater = getLayoutInflater();

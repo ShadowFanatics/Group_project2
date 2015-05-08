@@ -108,6 +108,7 @@ public class DragUnit extends RelativeLayout {
 
 	public void showInQueue() {
 		scoreLevel = 0;
+		breakLevel = 0;
 		//timer = new Timer();
 	//	timer.schedule(timer_task, 1000, 1000);
 		isInQueue = true;
